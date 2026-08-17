@@ -59,7 +59,8 @@ over from an earlier project of mine or from a third-party codebase, beyond the 
 in `pyproject.toml`.
 
 - Project scaffold and module layout
-- Sibyl Memory adapter (`memory.py`)
+- Sibyl Memory adapter (`memory.py`), wired to MemoryClient, Aug 17
+- Cold recall test passing against real Sibyl storage, Aug 17
 
 ## Running it
 
