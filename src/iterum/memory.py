@@ -73,3 +73,9 @@ def append_outcome_event(name: str, outcome: str, detail: dict[str, Any]) -> str
 def read_outcome_events(limit: int = 200) -> list[dict[str, Any]]:
     """Read the journal, newest first."""
     return client().read_events(limit=limit)
+
+
+def forget_counterparty(name: str) -> None:
+    """Remove a counterparty's consolidated record. Used to reset between demo
+    takes. The journal is append-only and is not touched by this."""
+    client().delete_entity(CATEGORY, name)
