@@ -71,6 +71,7 @@ in `pyproject.toml`.
 - `graph.py`: journal-first recording, entity consolidation, journal rebuild, Aug 19
 - `terms.py`: decayed trust score and four-tier ladder, Aug 19
 - Ladder behaviour pinned with tests, Aug 19
+- Domain switched to contract risk screening, `wrong_verdict` outcome added, Aug 21
 - No agent, providers, or payment layer built before Sep 1
 
 ## Running it
