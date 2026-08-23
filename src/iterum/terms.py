@@ -19,9 +19,9 @@ HALF_LIFE_DAYS = 7.0
 DELTAS = {
     "delivered": 8.0,
     "late": 2.0,
-    "stale": -20.0,
-    "failed_after_payment": -35.0,
-    "disputed_against": -15.0,
+    "stale": -14.0,
+    "failed_after_payment": -22.0,
+    "disputed_against": -12.0,
 }
 
 NEGATIVE = {"stale", "failed_after_payment", "disputed_against"}
