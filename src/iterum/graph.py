@@ -24,11 +24,12 @@ OUTCOMES = (
     "delivered",
     "late",
     "stale",
+    "wrong_verdict",
     "failed_after_payment",
     "disputed_against",
 )
 
-NEGATIVE_OUTCOMES = ("stale", "failed_after_payment", "disputed_against")
+NEGATIVE_OUTCOMES = ("stale", "wrong_verdict", "failed_after_payment", "disputed_against")
 
 
 def _now() -> str:

@@ -20,11 +20,12 @@ DELTAS = {
     "delivered": 8.0,
     "late": 2.0,
     "stale": -14.0,
+    "wrong_verdict": -30.0,
     "failed_after_payment": -22.0,
     "disputed_against": -12.0,
 }
 
-NEGATIVE = {"stale", "failed_after_payment", "disputed_against"}
+NEGATIVE = {"stale", "wrong_verdict", "failed_after_payment", "disputed_against"}
 
 # Promotion above a tier also requires this many consecutive clean deliveries
 # since the last negative outcome. Score alone is not enough: one lucky call
