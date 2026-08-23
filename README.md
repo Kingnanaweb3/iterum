@@ -1,11 +1,18 @@
 # Iterum
 
-An agent that pays other agents for services and remembers how each one behaved.
+An agent that buys contract risk screening from other agents, and remembers how each one
+behaved.
 
-Every transaction closes with an outcome written to a counterparty graph in Sibyl Memory:
-delivered, late, failed after payment, or disputed. The terms the agent offers next time are
-derived from that history, not from configuration. A provider that took payment and returned
-garbage gets prepayment refused, or gets skipped entirely.
+Before interacting with a token contract, the agent pays a provider for a verdict. Every
+transaction closes with an outcome written to a counterparty graph in Sibyl Memory: delivered,
+late, stale, wrong verdict, failed after payment, or disputed. The terms the agent offers next
+time are derived from that history, not from configuration.
+
+A provider that stays silent costs a fee. A provider that says "safe" about a contract that is
+not costs the position, and is penalised accordingly.
+
+The screening logic itself is synthetic: Iterum is not a real honeypot detector and does not
+claim to be. What is real is the payment, the failure, and the memory.
 
 Same counterparty, new session, different terms.
 

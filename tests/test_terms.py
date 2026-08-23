@@ -76,3 +76,23 @@ def test_terms_are_a_pure_function_of_history():
 
 def test_unknown_outcome_contributes_nothing():
     assert trust_score([{"outcome": "invented", "ts": ago(0)}], now=NOW) == 60.0
+
+
+def test_wrong_verdict_is_the_heaviest_penalty():
+    from iterum.terms import DELTAS
+    assert DELTAS["wrong_verdict"] < DELTAS["failed_after_payment"]
+    assert DELTAS["wrong_verdict"] < DELTAS["stale"]
+
+
+def test_one_wrong_verdict_blocks_immediately():
+    # Lying about a contract is not a first-offence-forgiven event.
+    t = derive_terms(h(("wrong_verdict", 0)), now=NOW)
+    assert t.tier == "blocked"
+    assert t.selectable is False
+
+
+def test_wrong_verdict_counts_as_negative_for_probation():
+    hist = h(("wrong_verdict", 20), ("delivered", 0))
+    t = derive_terms(hist, now=NOW)
+    assert t.clean_run == 1
+    assert t.tier == "guarded"
