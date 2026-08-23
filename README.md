@@ -61,6 +61,10 @@ in `pyproject.toml`.
 - Project scaffold and module layout
 - Sibyl Memory adapter (`memory.py`), wired to MemoryClient, Aug 17
 - Cold recall test passing against real Sibyl storage, Aug 17
+- `graph.py`: journal-first recording, entity consolidation, journal rebuild, Aug 19
+- `terms.py`: decayed trust score and four-tier ladder, Aug 19
+- Ladder behaviour pinned with tests, Aug 19
+- No agent, providers, or payment layer built before Sep 1
 
 ## Running it
 
