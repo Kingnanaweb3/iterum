@@ -59,5 +59,11 @@ async def buy(base_url: str, path: str, params: dict[str, Any], timeout: float =
             return PaymentResult(True, True, 200, r.json(), elapsed)
 
     except Exception as exc:
-        return PaymentResult(False, True, None, None,
-                             time.perf_counter() - t0, f"{type(exc).__name__}: {exc}")
+        elapsed = time.perf_counter() - t0
+        name = type(exc).__name__
+        # A timeout means the provider never answered. We cannot know whether
+        # the authorization settled, so treat it as a slow provider rather than
+        # accusing it of taking payment and absconding.
+        timed_out = "Timeout" in name or elapsed >= timeout
+        return PaymentResult(False, not timed_out, None, None, elapsed,
+                             f"{name}: {exc}" if str(exc) else name)

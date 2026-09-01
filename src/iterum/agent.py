@@ -28,7 +28,7 @@ PROVIDERS = {
 }
 
 FRESHNESS_MINUTES = 30
-TIMEOUT_SECONDS = float(os.getenv("ITERUM_TIMEOUT", 8.0))
+TIMEOUT_SECONDS = float(os.getenv("ITERUM_TIMEOUT", 6.0))
 
 
 def assess_all() -> dict[str, Any]:
@@ -49,6 +49,9 @@ def choose(assessment: dict[str, Any]) -> str | None:
 def _classify(name: str, address: str, result) -> tuple[str, str]:
     """Turn a payment result into a recorded outcome. Returns (outcome, note)."""
     if not result.paid:
+        # Distinguish our client failing to pay from the provider stalling.
+        if result.elapsed >= TIMEOUT_SECONDS:
+            return "late", f"no response in {result.elapsed:.1f}s"
         return "payment_not_attempted", result.error or ""
     if not result.ok:
         return "failed_after_payment", result.error or ""
