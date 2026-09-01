@@ -27,6 +27,7 @@ OUTCOMES = (
     "wrong_verdict",
     "failed_after_payment",
     "disputed_against",
+    "payment_not_attempted",
 )
 
 NEGATIVE_OUTCOMES = ("stale", "wrong_verdict", "failed_after_payment", "disputed_against")

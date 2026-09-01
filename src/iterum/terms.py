@@ -23,6 +23,8 @@ DELTAS = {
     "wrong_verdict": -30.0,
     "failed_after_payment": -22.0,
     "disputed_against": -12.0,
+    # Our client never paid. Not the provider's fault, so no penalty.
+    "payment_not_attempted": 0.0,
 }
 
 NEGATIVE = {"stale", "wrong_verdict", "failed_after_payment", "disputed_against"}
