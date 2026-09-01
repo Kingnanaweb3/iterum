@@ -19,7 +19,7 @@ HALF_LIFE_DAYS = 7.0
 DELTAS = {
     "delivered": 8.0,
     "late": 2.0,
-    "stale": -14.0,
+    "stale": -10.0,
     "wrong_verdict": -30.0,
     "failed_after_payment": -22.0,
     "disputed_against": -12.0,

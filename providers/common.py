@@ -74,7 +74,9 @@ def build(name: str, price: str, pay_to: str, profile: dict) -> FastAPI:
         else:
             verdict = truth
 
-        age = profile.get("stale_minutes", 0)
+        # Staleness is occasional, not constant: a provider that is always
+        # stale is broken, not unreliable.
+        age = profile.get("stale_minutes", 0) if random.random() < profile.get("stale", 0.0) else 0
         as_of = datetime.now(timezone.utc) - timedelta(minutes=age)
 
         return {
