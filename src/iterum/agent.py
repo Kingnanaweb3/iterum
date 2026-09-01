@@ -7,6 +7,7 @@ Delete the memory and every provider is a stranger.
 from __future__ import annotations
 
 import os
+import random
 from datetime import datetime, timedelta, timezone
 from typing import Any
 
@@ -36,14 +37,29 @@ def assess_all() -> dict[str, Any]:
     return {name: derive_terms(graph.get_history(name)) for name in PROVIDERS}
 
 
+EXPLORE_RATE = float(os.getenv("ITERUM_EXPLORE_RATE", 0.15))
+
+
 def choose(assessment: dict[str, Any]) -> str | None:
-    """Cheapest provider whose terms allow it and whose cap covers its price."""
+    """Cheapest provider whose terms allow it and whose cap covers its price.
+
+    With a small probability, sample an allowed provider the agent has never
+    used instead. Without this, reputation is one-directional: a provider that
+    is never chosen can never recover, and one never tried is never known.
+    """
     candidates = [
         (PROVIDERS[n]["price"], n)
         for n, t in assessment.items()
         if t.selectable and PROVIDERS[n]["price"] <= t.cap_usdc
     ]
-    return min(candidates)[1] if candidates else None
+    if not candidates:
+        return None
+
+    untried = [n for _, n in candidates if not graph.get_history(n)]
+    if untried and random.random() < EXPLORE_RATE:
+        return random.choice(untried)
+
+    return min(candidates)[1]
 
 
 def _classify(name: str, address: str, result) -> tuple[str, str]:
