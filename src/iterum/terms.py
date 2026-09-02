@@ -122,5 +122,8 @@ def derive_terms(history: list[dict[str, Any]], *, now: datetime | None = None) 
     if tier == "provisional":
         return Terms(tier, score, "on_delivery", 0.05, 1, True, run, reason)
     if tier == "guarded":
-        return Terms(tier, score, "escrow", 0.02, 0, True, run, reason)
+        # The cap limits exposure per purchase; escrow is what limits risk.
+        # Keeping the cap below a seller's own price would exclude it by
+        # accident rather than by decision, so guarded keeps the normal cap.
+        return Terms(tier, score, "escrow", 0.05, 0, True, run, reason)
     return Terms(tier, score, "refuse", 0.0, 0, False, run, reason)
