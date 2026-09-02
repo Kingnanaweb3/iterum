@@ -105,8 +105,15 @@ async def screen(address: str, *, verbose: bool = True) -> dict[str, Any]:
     provider = PROVIDERS[name]
 
     if verbose:
-        print(f"  chose {name} at {provider['price']} USDC "
-              f"[{terms.tier}, {terms.payment_mode}, {terms.reason}]")
+        prices = ", ".join(
+            f"{n} {PROVIDERS[n]['price']}"
+            + ("" if assessment[n].selectable else " (blocked)")
+            for n in sorted(PROVIDERS, key=lambda x: PROVIDERS[x]["price"])
+        )
+        print(f"  options:  {prices}")
+        print(f"  picked:   {name} at {provider['price']} USDC")
+        print(f"  because:  {terms.tier}, {terms.reason}")
+        print(f"  will pay: {terms.payment_mode}, cap {terms.cap_usdc} USDC")
 
     result = await buy(provider["url"], "/screen", {"address": address},
                        timeout=TIMEOUT_SECONDS + 6)
@@ -119,8 +126,15 @@ async def screen(address: str, *, verbose: bool = True) -> dict[str, Any]:
     )
 
     if verbose:
+        verdict = (result.body or {}).get("verdict")
+        if verdict:
+            truth = CONTROLS.get(address.lower(), "unknown")
+            print(f"  answer:   said '{verdict}', truth is '{truth}'")
+        else:
+            print(f"  answer:   none returned")
         detail = f" ({note})" if note else ""
-        print(f"  -> {outcome}{detail} in {result.elapsed:.2f}s")
+        print(f"  RECORDED: {outcome}{detail}, {result.elapsed:.2f}s")
+        print()
 
     return {"address": address, "provider": name, "outcome": outcome,
             "verdict": (result.body or {}).get("verdict")}
