@@ -1,0 +1,29 @@
+.section{
+  background:#fff;
+  padding:var(--pad-y) var(--pad-x);
+}
+.section-inner{
+  max-width:var(--max);
+  margin:0 auto;
+}
+.section-alt{background:var(--paper)}
+
+.section-label{
+  font-family:var(--mono);
+  font-size:10.5px;
+  letter-spacing:.14em;
+  text-transform:uppercase;
+  color:var(--muted);
+  margin:0 0 18px;
+}
+.section-title{
+  margin:0 0 22px;
+  max-width:18ch;
+}
+.section-lead{
+  margin:0;
+  max-width:52ch;
+  font-size:15px;
+  line-height:1.6;
+  color:#3A342E;
+}

@@ -72,7 +72,7 @@ def trust_score(history: list[dict[str, Any]], *, now: datetime | None = None) -
         ts = entry.get("ts")
         weight = 0.5 ** (_age_days(ts, now) / HALF_LIFE_DAYS) if ts else 1.0
         score += delta * weight
-    return max(0.0, min(100.0, score))
+    return round(max(0.0, min(100.0, score)), 1)
 
 
 def clean_run(history: list[dict[str, Any]]) -> int:

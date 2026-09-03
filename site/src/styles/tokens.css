@@ -1,0 +1,62 @@
+:root{
+  /* light surfaces */
+  --paper:#EFEDEA;
+  --card-light:#FBFAF8;
+  --ink:#12100E;
+  --ink-2:#4A453F;
+  --ink-3:#82796F;
+  --rule:#DCD8D2;
+
+  /* dark surfaces, the deck system in brown */
+  --surface:#0E0908;
+  --wash:linear-gradient(155deg,#0B0706 0%,#140C09 55%,#0C0807 100%);
+  --border:#241A15;
+  --card:rgba(255,255,255,.028);
+  --d-ink:#F5F1ED;
+  --d-ink-2:#A69C93;
+  --d-ink-3:#6E645C;
+
+  /* brand, warm brown */
+  --brand-1:#C98A4B;
+  --brand-2:#8A5A33;
+  --gradient:linear-gradient(140deg,var(--brand-1),var(--brand-2));
+
+  /* outcome colours: these carry meaning and never become brown */
+  --ok:#2F6B4F;
+  --warn:#A8791F;
+  --bad:#A63229;
+
+  --font-head:'Inter Tight',-apple-system,sans-serif;
+  --font-body:'DM Sans',-apple-system,sans-serif;
+  --font-mono:'Roboto Mono',ui-monospace,monospace;
+
+  --pad-y:clamp(72px,9vw,132px);
+  --pad-x:clamp(24px,7vw,96px);
+  --max:1160px;
+}
+
+*{box-sizing:border-box}
+#root{max-width:none;margin:0;padding:0;text-align:left;width:100%}
+body{
+  margin:0;background:var(--paper);color:var(--ink);
+  font-family:var(--font-body);font-weight:300;
+  font-size:16px;line-height:1.66;
+  overflow-x:clip;-webkit-font-smoothing:antialiased;
+}
+a{color:inherit;text-decoration:none}
+:focus-visible{outline:2px solid currentColor;outline-offset:3px}
+
+h1,h2,h3,h4{font-family:var(--font-head);font-weight:500;margin:0}
+h1{font-size:clamp(40px,6vw,74px);line-height:1.04;letter-spacing:-.032em}
+h2{font-size:clamp(36px,5.2vw,68px);line-height:1.05;letter-spacing:-.034em}
+h3{font-size:22px;letter-spacing:-.02em}
+h4{font-size:17px;letter-spacing:-.015em}
+
+.eyebrow{
+  font-family:var(--font-mono);font-size:12px;
+  letter-spacing:.1em;text-transform:uppercase;
+  color:var(--ink-3);margin:0 0 18px;
+}
+.mono{font-family:var(--font-mono);font-size:12.5px}
+
+@media(prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}}
