@@ -12,8 +12,8 @@
 }
 .hero-inner{
   position:relative;z-index:1;width:100%;
-  max-width:880px;margin:0 auto;padding:0 var(--pad-x);
-  transform:translateX(clamp(0px,4vw,74px));
+  max-width:1060px;margin:0 auto;padding:0 var(--pad-x);
+  transform:translateX(clamp(0px,8vw,150px));
 }
 .hero-title{margin:0;text-align:left;color:var(--ink)}
 .hero-line1{display:block}
@@ -25,7 +25,7 @@
 .hero-lead{
   display:block;text-align:left;max-width:40ch;
   font-family:var(--font-body);font-weight:300;
-  font-size:16px;line-height:1.62;letter-spacing:0;
+  font-size:17px;line-height:1.6;letter-spacing:0;
   color:var(--ink-2);align-self:end;transform:translateY(6px);
 }
 .hero-lead b{font-weight:500;color:var(--ink)}

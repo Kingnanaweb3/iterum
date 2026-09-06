@@ -8,9 +8,11 @@ import Deletion from "./components/Deletion";
 import Tiers from "./components/Tiers";
 import Scoring from "./components/Scoring";
 import Developers from "./components/Developers";
+import Live from "./components/Live";
+import Footer from "./components/Footer";
 import useReveal from "./hooks/useReveal";
 
-const REPO = "#";
+const REPO = "https://github.com/Kingnanaweb3/iterum";
 const VIDEO = "#";
 
 export default function App() {
@@ -24,7 +26,9 @@ export default function App() {
       <Deletion />
       <Tiers />
       <Scoring videoUrl={VIDEO} />
+      <Live />
       <Developers />
+      <Footer repoUrl={REPO} videoUrl={VIDEO} />
     </>
   );
 }

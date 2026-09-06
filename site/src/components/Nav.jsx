@@ -5,13 +5,14 @@ const LINKS = [
   ["The moment", "#moment"],
   ["Deletion test", "#deletion"],
   ["Tiers", "#tiers"],
+  ["Use the app", "#app"],
 ];
 
 export default function Nav({ repoUrl = "#" }) {
   return (
     <nav className="nav">
       <a className="nav-mark" href="#top">
-        <span className="nav-dot" aria-hidden="true" />
+        <img className="nav-logo" src="/mark.png" alt="" width="24" height="24" />
         Iterum
       </a>
       <div className="nav-links">
