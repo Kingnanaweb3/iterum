@@ -3,7 +3,13 @@ name = "iterum"
 version = "0.1.0"
 description = "An agent that remembers how each counterparty behaved, and changes its terms accordingly."
 requires-python = ">=3.10"
-dependencies = []
+dependencies = [
+  "sibyl-memory-client",
+  "x402[evm,httpx,fastapi]",
+  "fastapi",
+  "uvicorn[standard]",
+  "web3",
+]
 
 [project.optional-dependencies]
 dev = ["pytest"]
@@ -13,4 +19,5 @@ requires = ["setuptools>=68"]
 build-backend = "setuptools.build_meta"
 
 [tool.setuptools.packages.find]
-where = ["src"]
+where = ["src", "."]
+include = ["iterum*", "providers*"]

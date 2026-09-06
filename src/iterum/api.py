@@ -97,3 +97,45 @@ async def run(request: Request):
     result = await screen(address, verbose=False)
 
     return {"result": result, "state": _snapshot()}
+
+
+@app.get("/api/stats")
+def stats():
+    """Counted from the journal, not stored. The journal is append-only, so
+    these numbers cannot drift from what actually happened."""
+    events = graph.memory.read_outcome_events(limit=2000)
+    known = set(PROVIDERS)
+    cheapest = min(PROVIDERS, key=lambda n: PROVIDERS[n]["price"])
+
+    transactions = 0
+    spent = 0.0
+    overrides = 0
+    by_outcome: dict[str, int] = {}
+
+    for e in events:
+        extra = e.get("extra") or {}
+        seller = extra.get("counterparty")
+        outcome = extra.get("outcome")
+        if seller not in known or not outcome:
+            continue
+        transactions += 1
+        by_outcome[outcome] = by_outcome.get(outcome, 0) + 1
+        try:
+            spent += float(extra.get("amount_usdc") or 0)
+        except (TypeError, ValueError):
+            pass
+        # the record overrode price whenever the cheapest seller was not chosen
+        if seller != cheapest:
+            overrides += 1
+
+    assessment = assess_all()
+    blocked = [n for n, t in assessment.items() if not t.selectable]
+
+    return {
+        "transactions": transactions,
+        "spent_usdc": round(spent, 4),
+        "overrides": overrides,
+        "override_pct": round(100 * overrides / transactions) if transactions else 0,
+        "blocked": blocked,
+        "by_outcome": dict(sorted(by_outcome.items(), key=lambda kv: -kv[1])),
+    }

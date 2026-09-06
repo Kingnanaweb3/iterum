@@ -37,12 +37,19 @@ def _signals(verdict: str) -> dict:
     }
 
 
-def build(name: str, price: str, pay_to: str, profile: dict) -> FastAPI:
+def build(name: str, price: str, pay_to: str, profile: dict,
+          mount: str = "") -> FastAPI:
+    """mount is the prefix this app is mounted at, e.g. "/p/nadir".
+
+    The x402 middleware matches on the raw request path, so when the app is
+    mounted the route key has to include the prefix or nothing matches and
+    the endpoint is served for free.
+    """
     facilitator = HTTPFacilitatorClient(FacilitatorConfig(url=FACILITATOR))
     server = register_exact_evm_server(x402ResourceServer(facilitator), networks=NETWORK)
 
     routes = {
-        "/screen": {
+        f"{mount}/screen": {
             "accepts": [
                 {"scheme": "exact", "payTo": pay_to, "price": price, "network": NETWORK}
             ]

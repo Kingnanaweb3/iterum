@@ -22,10 +22,14 @@ CONTROLS = {
     "0x4444444444444444444444444444444444444444": "safe",
 }
 
+# Hosted: all three are mounted into one app, so they share a base URL.
+# Local: each runs on its own port.
+_BASE = os.getenv("ITERUM_PROVIDER_BASE")
+
 PROVIDERS = {
-    "aegis":    {"url": "http://localhost:8001", "price": 0.05},
-    "meridian": {"url": "http://localhost:8002", "price": 0.02},
-    "nadir":    {"url": "http://localhost:8003", "price": 0.005},
+    "aegis":    {"url": f"{_BASE}/p/aegis"    if _BASE else "http://localhost:8001", "price": 0.05},
+    "meridian": {"url": f"{_BASE}/p/meridian" if _BASE else "http://localhost:8002", "price": 0.02},
+    "nadir":    {"url": f"{_BASE}/p/nadir"    if _BASE else "http://localhost:8003", "price": 0.005},
 }
 
 FRESHNESS_MINUTES = 30
