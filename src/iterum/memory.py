@@ -23,6 +23,7 @@ from sibyl_memory_client import MemoryClient
 
 CATEGORY = "counterparty"
 
+# On Railway this points at a mounted volume so the record survives deploys.
 _DB_PATH = os.getenv("ITERUM_SIBYL_DB", "~/.sibyl-memory/memory.db")
 
 _client: MemoryClient | None = None
