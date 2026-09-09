@@ -101,68 +101,102 @@ async def run(request: Request):
 
 @app.get("/api/stats")
 def stats():
-    """Counted from the journal, not stored anywhere. The journal is
-    append-only, so these numbers cannot drift from what happened."""
+    """Counted from the journal, not stored. The journal is append-only, so
+    none of these numbers can drift from what actually happened."""
+    from .terms import DELTAS, NEGATIVE
+
     events = graph.memory.read_outcome_events(limit=5000)
     known = set(PROVIDERS)
     cheapest = min(PROVIDERS, key=lambda n: PROVIDERS[n]["price"])
+    cheapest_price = PROVIDERS[cheapest]["price"]
 
-    transactions = 0
-    spent = 0.0
+    rows = []
+    for e in reversed(events):  # oldest first
+        extra = e.get("extra") or {}
+        if extra.get("counterparty") in known and extra.get("outcome"):
+            rows.append((extra["counterparty"], extra["outcome"], extra, e.get("ts")))
+
+    transactions = len(rows)
+    spent = wasted = 0.0
     overrides = 0
-    paid_for_nothing = 0.0
     by_outcome: dict[str, int] = {}
     per_seller: dict[str, dict[str, int]] = {n: {} for n in PROVIDERS}
+    sessions = set()
 
-    for e in events:
-        extra = e.get("extra") or {}
-        seller, outcome = extra.get("counterparty"), extra.get("outcome")
-        if seller not in known or not outcome:
-            continue
+    # tracked per seller as we walk the journal forward
+    run = {n: 0 for n in PROVIDERS}
+    best_run = {n: 0 for n in PROVIDERS}
+    was_bad = {n: False for n in PROVIDERS}
+    recoveries = {n: 0 for n in PROVIDERS}
 
-        transactions += 1
+    for seller, outcome, extra, ts in rows:
         by_outcome[outcome] = by_outcome.get(outcome, 0) + 1
         per_seller[seller][outcome] = per_seller[seller].get(outcome, 0) + 1
+        if ts:
+            sessions.add(ts[:13])  # hour buckets
 
         try:
             amount = float(extra.get("amount_usdc") or 0)
         except (TypeError, ValueError):
             amount = 0.0
         spent += amount
-
-        # money that bought nothing usable
         if outcome in ("failed_after_payment", "wrong_verdict", "stale"):
-            paid_for_nothing += amount
-
-        # the record overrode price whenever the cheapest seller was not used
+            wasted += amount
         if seller != cheapest:
             overrides += 1
 
+        if outcome == "delivered":
+            run[seller] += 1
+            best_run[seller] = max(best_run[seller], run[seller])
+            # two clean deliveries after a bad record is a recovery
+            if was_bad[seller] and run[seller] >= 2:
+                recoveries[seller] += 1
+                was_bad[seller] = False
+        elif outcome in NEGATIVE:
+            run[seller] = 0
+            was_bad[seller] = True
+        else:
+            run[seller] = 0
+
     delivered = by_outcome.get("delivered", 0)
     lies = by_outcome.get("wrong_verdict", 0)
-    failures = sum(by_outcome.get(o, 0) for o in
-                   ("failed_after_payment", "wrong_verdict", "stale", "disputed_against"))
+    failures = sum(by_outcome.get(o, 0) for o in NEGATIVE)
+
+    # what the failures would have cost had the agent kept buying cheapest
+    avoided = round(overrides * cheapest_price * (failures / transactions), 4) if transactions else 0.0
+
+    movement = 0.0
+    for outcome, count in by_outcome.items():
+        movement += DELTAS.get(outcome, 0.0) * count
 
     assessment = assess_all()
-    blocked = [n for n, t in assessment.items() if not t.selectable]
-    guarded = [n for n, t in assessment.items() if t.tier == "guarded"]
 
     def pct(n):
         return round(100 * n / transactions, 1) if transactions else 0.0
 
     return {
         "transactions": transactions,
+        "sessions": len(sessions),
         "delivered": delivered,
         "delivered_pct": pct(delivered),
         "failures": failures,
         "failure_pct": pct(failures),
         "lies": lies,
         "spent_usdc": round(spent, 4),
-        "wasted_usdc": round(paid_for_nothing, 4),
+        "wasted_usdc": round(wasted, 4),
+        "wasted_pct": round(100 * wasted / spent, 1) if spent else 0.0,
+        "estimated_avoided_usdc": avoided,
         "overrides": overrides,
         "override_pct": pct(overrides),
-        "blocked": blocked,
-        "guarded": guarded,
+        "recoveries": sum(recoveries.values()),
+        "recoveries_per_seller": recoveries,
+        "longest_clean_run": max(best_run.values()) if best_run else 0,
+        "clean_runs_per_seller": best_run,
+        "net_score_movement": round(movement, 1),
+        "blocked": [n for n, t in assessment.items() if not t.selectable],
+        "guarded": [n for n, t in assessment.items() if t.tier == "guarded"],
+        "trusted": [n for n, t in assessment.items() if t.tier == "trusted"],
+        "current_scores": {n: round(t.score, 1) for n, t in assessment.items()},
         "by_outcome": dict(sorted(by_outcome.items(), key=lambda kv: -kv[1])),
         "per_seller": per_seller,
     }
