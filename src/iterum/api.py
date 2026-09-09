@@ -101,41 +101,90 @@ async def run(request: Request):
 
 @app.get("/api/stats")
 def stats():
-    """Counted from the journal, not stored. The journal is append-only, so
-    these numbers cannot drift from what actually happened."""
-    events = graph.memory.read_outcome_events(limit=2000)
+    """Counted from the journal, not stored anywhere. The journal is
+    append-only, so these numbers cannot drift from what happened."""
+    events = graph.memory.read_outcome_events(limit=5000)
     known = set(PROVIDERS)
     cheapest = min(PROVIDERS, key=lambda n: PROVIDERS[n]["price"])
 
     transactions = 0
     spent = 0.0
     overrides = 0
+    paid_for_nothing = 0.0
     by_outcome: dict[str, int] = {}
+    per_seller: dict[str, dict[str, int]] = {n: {} for n in PROVIDERS}
 
     for e in events:
         extra = e.get("extra") or {}
-        seller = extra.get("counterparty")
-        outcome = extra.get("outcome")
+        seller, outcome = extra.get("counterparty"), extra.get("outcome")
         if seller not in known or not outcome:
             continue
+
         transactions += 1
         by_outcome[outcome] = by_outcome.get(outcome, 0) + 1
+        per_seller[seller][outcome] = per_seller[seller].get(outcome, 0) + 1
+
         try:
-            spent += float(extra.get("amount_usdc") or 0)
+            amount = float(extra.get("amount_usdc") or 0)
         except (TypeError, ValueError):
-            pass
-        # the record overrode price whenever the cheapest seller was not chosen
+            amount = 0.0
+        spent += amount
+
+        # money that bought nothing usable
+        if outcome in ("failed_after_payment", "wrong_verdict", "stale"):
+            paid_for_nothing += amount
+
+        # the record overrode price whenever the cheapest seller was not used
         if seller != cheapest:
             overrides += 1
 
+    delivered = by_outcome.get("delivered", 0)
+    lies = by_outcome.get("wrong_verdict", 0)
+    failures = sum(by_outcome.get(o, 0) for o in
+                   ("failed_after_payment", "wrong_verdict", "stale", "disputed_against"))
+
     assessment = assess_all()
     blocked = [n for n, t in assessment.items() if not t.selectable]
+    guarded = [n for n, t in assessment.items() if t.tier == "guarded"]
+
+    def pct(n):
+        return round(100 * n / transactions, 1) if transactions else 0.0
 
     return {
         "transactions": transactions,
+        "delivered": delivered,
+        "delivered_pct": pct(delivered),
+        "failures": failures,
+        "failure_pct": pct(failures),
+        "lies": lies,
         "spent_usdc": round(spent, 4),
+        "wasted_usdc": round(paid_for_nothing, 4),
         "overrides": overrides,
-        "override_pct": round(100 * overrides / transactions) if transactions else 0,
+        "override_pct": pct(overrides),
         "blocked": blocked,
+        "guarded": guarded,
         "by_outcome": dict(sorted(by_outcome.items(), key=lambda kv: -kv[1])),
+        "per_seller": per_seller,
+    }
+
+
+@app.get("/api/integrity")
+def integrity():
+    """For every seller, does the summary still match the journal?
+
+    Reported rather than asserted: the summary is a cache, and this is the
+    check that says whether it needs rebuilding."""
+    report = []
+    for name in PROVIDERS:
+        entity = [h.get("outcome") for h in graph.get_history(name)]
+        journal = [h.get("outcome") for h in graph.rebuild_from_journal(name)]
+        report.append({
+            "seller": name,
+            "summary_entries": len(entity),
+            "journal_entries": len(journal),
+            "in_sync": entity == journal,
+        })
+    return {
+        "sellers": report,
+        "all_in_sync": all(r["in_sync"] for r in report),
     }
