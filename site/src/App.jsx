@@ -9,6 +9,7 @@ import Tiers from "./components/Tiers";
 import Scoring from "./components/Scoring";
 import Developers from "./components/Developers";
 import Live from "./components/Live";
+import Stats from "./components/Stats";
 import Footer from "./components/Footer";
 import useReveal from "./hooks/useReveal";
 
@@ -26,6 +27,7 @@ export default function App() {
       <Deletion />
       <Tiers />
       <Scoring videoUrl={VIDEO} />
+      <Stats />
       <Live />
       <Developers />
       <Footer repoUrl={REPO} videoUrl={VIDEO} />

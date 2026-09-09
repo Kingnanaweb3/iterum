@@ -42,6 +42,7 @@ def assess_all() -> dict[str, Any]:
 
 
 EXPLORE_RATE = float(os.getenv("ITERUM_EXPLORE_RATE", 0.15))
+RETRY_RATE = float(os.getenv("ITERUM_RETRY_RATE", 0.20))
 
 
 def choose(assessment: dict[str, Any]) -> str | None:
@@ -62,6 +63,12 @@ def choose(assessment: dict[str, Any]) -> str | None:
     untried = [n for _, n in candidates if not graph.get_history(n)]
     if untried and random.random() < EXPLORE_RATE:
         return random.choice(untried)
+
+    # Occasionally re-test a seller that is on escrow. Without this a seller
+    # that improved can never prove it, and a reputation can only ever fall.
+    guarded = [n for _, n in candidates if assessment[n].tier == "guarded"]
+    if guarded and random.random() < RETRY_RATE:
+        return random.choice(guarded)
 
     return min(candidates)[1]
 

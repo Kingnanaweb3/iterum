@@ -24,7 +24,7 @@ export default function Live() {
     try {
       const [s, f] = await Promise.all([
         fetch(`${API}/api/state`).then((r) => r.json()),
-        fetch(`${API}/api/feed?limit=8`).then((r) => r.json()),
+        fetch(`${API}/api/feed?limit=14`).then((r) => r.json()),
       ]);
       setState(s);
       setFeed(f.events ?? []);
